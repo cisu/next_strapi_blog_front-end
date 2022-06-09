@@ -1,21 +1,38 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
 import { toast } from "react-toastify";
 import { API_URL } from "@config/index";
+import Layout from "@components/Layout";
+import { formatDateForState } from "@utils/formatDate";
+import {FaImage} from 'react-icons/fa';
 import styles from "@styles/Form.module.css";
-import Layout from "../../components/Layout";
 
-const AddEventPage = () => {
+
+
+
+const EditEventPage = ({ evt }) => {
+  console.log("evt: ", evt);
+
+  const event = evt.data.attributes;
+
+  const id = evt.data.id;
+
+  const image =
+    evt?.data?.attributes?.image?.data?.attributes?.formats?.thumbnail?.url;
+
   const [values, setValues] = useState({
-    name: "",
-    performers: "",
-    venue: "",
-    address: "",
-    date: "",
-    time: "",
-    description: "",
+    name: event?.name,
+    performers: event?.performers,
+    venue: event?.venue,
+    address: event?.address,
+    date: formatDateForState(event?.date),
+    time: event?.time,
+    description: event?.description,
   });
+
+  const [imagePreview, setImagePreview] = useState(image ? image : null);
 
   const router = useRouter();
 
@@ -39,8 +56,8 @@ const AddEventPage = () => {
     // }
 
     if (valid) {
-      const res = await fetch(`${API_URL}/api/eventsses`, {
-        method: "POST",
+      const res = await fetch(`${API_URL}/api/eventsses/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -49,16 +66,12 @@ const AddEventPage = () => {
 
       if (!res.ok) {
         toast.error("Something Went Worng");
-      }
-
-      else {
+      } else {
         const evt = await res.json();
-        
-        console.log('evnt: ', evt)
-  
+
+        console.log("evnt: ", evt);
+
         router.push(`/events/${evt?.data?.attributes?.slug}`);
-       
-      
       }
     }
   };
@@ -74,7 +87,7 @@ const AddEventPage = () => {
         <a>Go Back</a>
       </Link>
 
-      <h1>Add Event</h1>
+      <h1>Edit Event</h1>
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.grid}>
@@ -163,10 +176,40 @@ const AddEventPage = () => {
           ></textarea>
         </div>
 
-        <input type="submit" value="Add Event" className="btn" />
+        <input type="submit" value="Update Event" className="btn" />
       </form>
+
+      <h2>Event Image</h2>
+      {imagePreview ? (
+        <Image alt={event?.name} src={imagePreview} width={170} height={100} />
+      ) : (
+        <div>
+            <p>No image uploaded</p>
+        </div>
+      )}
+
+      <div>
+          <button className="btn-secondary" style={{display: "flex",
+alignItems: "center"}}>
+            <FaImage /> 
+            <span style={{marginLeft: '0.3rem'}}>
+            Set Image</span> 
+          </button>
+      </div>
     </Layout>
   );
 };
 
-export default AddEventPage;
+export async function getServerSideProps({ params: { id } }) {
+  const res = await fetch(`${API_URL}/api/eventsses/${id}?populate=*`);
+
+  const evt = await res.json();
+
+  return {
+    props: {
+      evt,
+    },
+  };
+}
+
+export default EditEventPage;
