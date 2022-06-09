@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { toast } from "react-toastify";
 import { API_URL } from "@config/index";
 import styles from "@styles/Form.module.css";
 import Layout from "../../components/Layout";
@@ -18,9 +19,48 @@ const AddEvent = () => {
 
   const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(values);
+
+    let valid = true;
+
+    // Validation
+    // const hasEmotyFields = Object.values(values).some((el) => el === '')
+    for (const [key, value] of Object.entries(values)) {
+      if (value === "") {
+        valid = false;
+        toast.error(`${key.toUpperCase()}  can not be left empty`);
+      }
+    }
+
+    // if(hasEmotyFields){
+    //   toast.error(`please fill all field`);
+    //   return;
+    // }
+
+    if (valid) {
+      const res = await fetch(`${API_URL}/api/eventsses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: values }),
+      });
+
+      if (!res.ok) {
+        toast.error("Something Went Worng");
+      }
+
+      else {
+        const evt = await res.json();
+        
+        console.log('evnt: ', evt)
+  
+        router.push(`/events/${evt?.data?.attributes?.slug}`);
+       
+      
+      }
+    }
   };
 
   const handleInputChange = (e) => {
@@ -109,23 +149,21 @@ const AddEvent = () => {
               onChange={handleInputChange}
             />
           </div>
-
         </div>
 
-         {/* description */}
-         <div>
-            <label htmlFor="description">Description</label>
-            <textarea
-              type="text"
-              id="description"
-              name="description"
-              value={values.description}
-              onChange={handleInputChange}
-            ></textarea>
-          </div>
+        {/* description */}
+        <div>
+          <label htmlFor="description">Description</label>
+          <textarea
+            type="text"
+            id="description"
+            name="description"
+            value={values.description}
+            onChange={handleInputChange}
+          ></textarea>
+        </div>
 
-          <input type="submit" value="Add Event" className="btn" />
-
+        <input type="submit" value="Add Event" className="btn" />
       </form>
     </Layout>
   );

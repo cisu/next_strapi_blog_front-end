@@ -1,9 +1,11 @@
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import { FaPencilAlt, FaTimes } from "react-icons/fa";
 import Layout from "../../components/Layout";
 import { API_URL } from "@config/index";
+import { toast } from "react-toastify";
 import styles from "@styles/Event.module.css";
 
 // functions
@@ -12,6 +14,8 @@ import formatDate from '../../utils/formatDate';
 const qs = require('qs');
 
 const EventPage = ({ evt }) => {
+
+  const router = useRouter()
 
   const event = evt.data[0]?.attributes
 
@@ -27,23 +31,46 @@ const EventPage = ({ evt }) => {
 
 
 
+  const deleteEvent = async (e) => {
+    if(confirm('Are you sure?')){
+      console.log('yes i am');
+      const res = await fetch(`${API_URL}/api/eventsses/${id}`,{
+        method: 'DELETE',
+      })
 
-  const deleteEvent = (e) => {
-    console.log("delete");
+      console.log('res:', res)
+
+      const data = await res.json()
+
+      console.log('data:', data)
+
+
+      if(!res.ok) {
+        toast.error(data.message)
+      }else{
+        router.push('/events')
+      }
+
+    }
   };
 
   return (
     <Layout>
       <div className={styles.event}>
         <div className={styles.controls}>
+          
+          {/* edit */}
           <Link href={`/events/edit/${id}`}>
             <a className={styles.edit}>
               <FaPencilAlt /> Edit Event
             </a>
           </Link>
+          
+          {/* delete */}
           <a href="#" className={styles.delete} onClick={deleteEvent}>
             <FaTimes /> Delete Event
           </a>
+
         </div>
 
         <span>
