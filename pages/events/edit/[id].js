@@ -5,16 +5,12 @@ import Image from "next/image";
 import { toast } from "react-toastify";
 import { API_URL } from "@config/index";
 import Layout from "@components/Layout";
+import Modal from "@components/Modal";
 import { formatDateForState } from "@utils/formatDate";
-import {FaImage} from 'react-icons/fa';
+import { FaImage } from "react-icons/fa";
 import styles from "@styles/Form.module.css";
 
-
-
-
 const EditEventPage = ({ evt }) => {
-  console.log("evt: ", evt);
-
   const event = evt.data.attributes;
 
   const id = evt.data.id;
@@ -35,6 +31,10 @@ const EditEventPage = ({ evt }) => {
   const [imagePreview, setImagePreview] = useState(image ? image : null);
 
   const router = useRouter();
+
+  const [showModal, setShowModal] = useState(false);
+
+  console.log('showModal: ', showModal)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -184,18 +184,25 @@ const EditEventPage = ({ evt }) => {
         <Image alt={event?.name} src={imagePreview} width={170} height={100} />
       ) : (
         <div>
-            <p>No image uploaded</p>
+          <p>No image uploaded</p>
         </div>
       )}
 
       <div>
-          <button className="btn-secondary" style={{display: "flex",
-alignItems: "center"}}>
-            <FaImage /> 
-            <span style={{marginLeft: '0.3rem'}}>
-            Set Image</span> 
-          </button>
+        <button
+          className="btn-secondary"
+          style={{ display: "flex", alignItems: "center" }}
+          onClick={() => setShowModal(true)}
+        >
+          <FaImage />
+          <span style={{ marginLeft: "0.3rem" }}>Set Image</span>
+        </button>
       </div>
+
+        <Modal show={showModal} onClose={() => setShowModal(false)}>
+            Image UPLOAD
+        </Modal>
+
     </Layout>
   );
 };
