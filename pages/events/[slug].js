@@ -25,8 +25,6 @@ const EventPage = ({ evt }) => {
   const image_path = event?.image?.data?.attributes?.formats?.medium?.url
 
 
-  console.log('event: ', event)
-
 
 
 
